@@ -87,15 +87,17 @@ En las imágenes `wp_*`, con luces de color intensas, aparecen las fallas:
 
 ### Parte 2. Histogramas
 
-`img1_tp.png` es un degradé vertical y `img2_tp.png` una margarita con un marco blanco. Se usaron 64 bins: con 256 la curva queda irregular y con 16 el pico en 255 se mezcla con los valores de los pétalos.
+`img1_tp.png` es un degradé vertical que termina en una franja blanca, y `img2_tp.png` una margarita rodeada por un marco blanco de 6 a 9 píxeles. Ese marco no se distingue sobre una página blanca, por eso las imágenes se muestran sobre fondo gris. Se usaron 64 bins: con 256 la curva queda irregular y con 16 el pico en 255 se mezcla con los valores de los pétalos.
 
 ![Imágenes en escala de grises](TP1/figuras/imagenes_grises.png)
 
 ![Histogramas](TP1/figuras/histogramas.png)
 
-Los dos histogramas son idénticos (correlación 1) porque las dos imágenes tienen exactamente el mismo conjunto de valores de píxel, dispuestos de otra manera. En la margarita, el modo oscuro se asocia visualmente con el fondo, el pico cercano a 150 con el disco central y el modo claro con los pétalos. El pico en 255 (10 % de los píxeles) corresponde al marco blanco: los pétalos no superan 247 y no hay valores entre 248 y 254.
+Los dos histogramas son idénticos (correlación 1) porque las dos imágenes tienen exactamente el mismo conjunto de valores de píxel, dispuestos de otra manera. En la margarita, el modo oscuro se asocia visualmente con el fondo, el pico cercano a 150 con el disco central y el modo claro con los pétalos. El pico en 255 (10 % de los píxeles) corresponde al marco blanco: los pétalos no superan 247, no hay valores entre 248 y 254, y los 8400 píxeles en 255 están todos en el borde de la imagen.
 
-Como feature aislada, el histograma no alcanza para clasificar o detectar: descarta la información espacial, y este caso lo muestra con dos imágenes de contenido opuesto que producen el mismo vector. El contraste local, que sí depende de la disposición de los píxeles, las separa claramente (30 contra 192). A favor, el histograma es invariante a las transformaciones que solo reordenan píxeles (espejados, rotaciones de 90° y 180°) y aproximadamente invariante a rotaciones arbitrarias, traslaciones y cambios de escala, que interpolan o recortan; normalizado no depende del número de píxeles y es barato de calcular, por lo que sirve como feature complementaria o cuando las clases se distinguen por su distribución de intensidades. Calculado por regiones recupera parte de la información espacial.
+Como feature aislada, el histograma no alcanza para clasificar o detectar: descarta la información espacial. En este trabajo observamos que un degradé y una flor producen el mismo vector, mientras que el contraste local, que sí depende de la disposición de los píxeles, las separa claramente (30 contra 192). Además, el histograma cambia con la iluminación aunque el contenido no cambie: es la situación inversa, la misma escena puede dar histogramas distintos. A favor, el histograma es invariante a las transformaciones que solo reordenan píxeles (espejados, rotaciones de 90° y 180°) y aproximadamente invariante a rotaciones arbitrarias, traslaciones y cambios de escala, que interpolan o recortan; normalizado no depende del número de píxeles y es barato de calcular, por lo que sirve como feature complementaria o cuando las clases se distinguen por su distribución de intensidades. Calculado por regiones recupera parte de la información espacial.
+
+En síntesis, `img1` e `img2` contienen la misma información, pero distribuida de manera diferente. El histograma conserva la información y descarta la distribución, y es justamente en la distribución donde está lo que hace que una imagen sea una flor y la otra un degradé.
 
 ### Referencias
 
