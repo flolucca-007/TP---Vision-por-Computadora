@@ -87,7 +87,7 @@ En las imágenes `wp_*`, con luces de color intensas, aparecen las fallas:
 
 ### Parte 2. Histogramas
 
-`img1_tp.png` es un degradé vertical que termina en una franja blanca, y `img2_tp.png` una margarita rodeada por un marco blanco de 6 a 9 píxeles. Ese marco no se distingue sobre una página blanca, por eso las imágenes se muestran sobre fondo gris. Se usaron 64 bins: con 256 la curva queda irregular y con 16 el pico en 255 se mezcla con los valores de los pétalos.
+`img1_tp.png` es un degradé vertical que termina en una franja blanca, y `img2_tp.png` una margarita rodeada por un marco blanco. Ese marco no se distingue sobre una página blanca, por eso las imágenes se muestran sobre fondo gris. Se usaron 64 bins: con 256 la curva queda irregular y con 16 el pico en 255 se mezcla con los valores de los pétalos.
 
 ![Imágenes en escala de grises](TP1/figuras/imagenes_grises.png)
 
