@@ -15,7 +15,7 @@ Material de la materia: [FIUBA-Posgrado-Inteligencia-Artificial/vision_computado
 ## Contenido
 
 * [TP1](TP1/): White Patch e histogramas en escala de grises.
-* TP2: pendiente.
+* [TP2](TP2/): detección de máximo enfoque en video con una métrica en el dominio de la frecuencia.
 * TP3: pendiente.
 
 ## Cómo ejecutar los notebooks
@@ -23,8 +23,8 @@ Material de la materia: [FIUBA-Posgrado-Inteligencia-Artificial/vision_computado
 Requisitos: Python 3 con NumPy, OpenCV, Matplotlib y Jupyter.
 
 ```bash
-git clone https://github.com/lugo2012cl-prog/CVI-IA.git
-cd CVI-IA
+git clone https://github.com/flolucca-007/TP---Vision-por-Computadora.git
+cd TP---Vision-por-Computadora
 python3 -m venv .venv
 source .venv/bin/activate          # en Windows: .venv\Scripts\activate
 pip install -r requirements.txt
@@ -32,9 +32,9 @@ cd TP1
 jupyter notebook TP1_Vision_por_Computadora_I.ipynb
 ```
 
-Cada notebook lee las imágenes con rutas relativas a su propia carpeta, por lo que debe abrirse desde ella (en el ejemplo, desde `TP1`). Las imágenes necesarias están incluidas en el repositorio y no hace falta descargar nada más.
+Cada notebook lee las imágenes y el video con rutas relativas a su propia carpeta, por lo que debe abrirse desde ella (en el ejemplo, desde `TP1`). Los archivos necesarios están incluidos en el repositorio y no hace falta descargar nada más.
 
-El notebook del TP1 se ejecutó completo, de la primera a la última celda, con Python 3.13, NumPy 2.5, OpenCV 5.0 y Matplotlib 3.11. Es la combinación con la que se probó, no un requisito: `requirements.txt` no fija versiones.
+Los notebooks del TP1 y del TP2 se ejecutaron completos, de la primera a la última celda, con Python 3.13, NumPy 2.5, OpenCV 5.0 y Matplotlib 3.11. Es la combinación con la que se probó, no un requisito: `requirements.txt` no fija versiones.
 
 
 ## TP1. White Patch e histogramas
@@ -99,9 +99,60 @@ Como feature aislada, el histograma no alcanza para clasificar o detectar: desca
 
 En síntesis, `img1` e `img2` contienen la misma información, pero distribuida de manera diferente. El histograma conserva la información y descarta la distribución, y es justamente en la distribución donde está lo que hace que una imagen sea una flor y la otra un degradé.
 
+
+## TP2. Detección de máximo enfoque en video
+
+Notebook: [TP2/TP2_Vision_por_Computadora_I.ipynb](TP2/TP2_Vision_por_Computadora_I.ipynb)
+
+### Consigna
+
+Implementar un detector de máximo enfoque sobre el video `focus_video.mov` aplicando técnicas de análisis espectral, similar al que utilizan las cámaras digitales modernas.
+
+1. Implementar un algoritmo que, dada una imagen o región, calcule la métrica propuesta en el paper "Image Sharpness Measure for Blurred Images in Frequency Domain" y realizar dos experimentos: medición sobre todo el frame y medición sobre una ROI ubicada en el centro del frame, con un área del 5 o 10% del área total.
+2. Para cada experimento, presentar una o varias curvas que muestren la evolución de la métrica frame a frame, donde se vea claramente cuándo el algoritmo detectó la región de máximo enfoque. El algoritmo debe detectar y devolver los puntos de máximo enfoque de manera automática.
+
+Puntos extra: aplicar unsharp masking para expandir la zona de enfoque y devolver.
+
+### Estructura
+
+```
+TP2/
+    TP2_Vision_por_Computadora_I.ipynb    notebook con el código, los resultados y el análisis
+    video/focus_video.mov                 video del enunciado
+    figuras/                              figuras generadas por el notebook
+    salidas/focus_video_usm.mp4           video con unsharp masking en los frames de frontera
+```
+
+El video proviene de la carpeta `Material_TPs/TP2` del repositorio de la materia.
+
+### Métrica y detección
+
+La métrica FM (De y Masilamani, 2013) es la fracción de componentes de la transformada de Fourier centrada cuyo módulo supera la milésima parte del máximo. Se validó con desenfoque gaussiano sintético: decrece en forma monótona con sigma. El detector suaviza la curva con una media móvil de 5 frames, la normaliza entre su mínimo y su máximo y devuelve el intervalo contiguo al pico que supera el 80% del rango. El umbral se verificó inspeccionando los frames a resolución completa y es estable entre 0,7 y 0,85.
+
+| Experimento | Región de máximo enfoque | Pico |
+|---|---|---|
+| Frame completo | frames 76 a 116 (2,54 a 3,87 s) | 109 |
+| ROI central 5% | frames 89 a 114 (2,97 a 3,80 s) | 111 |
+| ROI central 10% | frames 90 a 114 (3,00 a 3,80 s) | 111 |
+| Matriz de enfoque 7 x 7 | frames 84 a 114 (2,80 a 3,80 s) | 99 |
+
+![Curvas sobre las ROI centrales](TP2/figuras/exp2_roi.png)
+
+Todo el proceso queda reunido en la función `detectar_maximo_enfoque`, que recibe la ruta del video y devuelve la curva, el frame de máximo enfoque y la región en frames y en segundos.
+
+La ROI da la detección más acotada y con el doble de rango dinámico que el frame completo, porque mide un solo objeto a una profundidad homogénea. La matriz de enfoque, la misma idea de la curva de referencia del enunciado, muestra además cómo el plano de foco recorre la escena.
+
+### Puntos extra
+
+El unsharp masking se aplica solo a los frames de frontera, con la mayor ganancia que cumple dos reglas para no generar artefactos: ningún frame procesado supera la mediana de los frames realmente enfocados y se satura menos del 0,5% de los píxeles. En la ROI del 10% la región pasa de 90 a 114 a 86 a 114. Como control, el mismo filtro aplicado a todos los frames no ensancha la región, lo que muestra que el efecto se debe al tratamiento diferenciado de la frontera.
+
+![Unsharp masking en la zona de frontera](TP2/figuras/extra_usm_curvas.png)
+
+
 ### Referencias
 
 * Szeliski, R. (2022). Computer Vision: Algorithms and Applications (2.ª ed.). Springer.
 * Forsyth, D. A. y Ponce, J. (2012). Computer Vision: A Modern Approach (2.ª ed.). Pearson.
 * Dalal, N. y Triggs, B. (2005). Histograms of Oriented Gradients for Human Detection. En IEEE Conference on Computer Vision and Pattern Recognition (CVPR).
 * Documentación de OpenCV: https://docs.opencv.org
+* De, K. y Masilamani, V. (2013). Image Sharpness Measure for Blurred Images in Frequency Domain. Procedia Engineering, 64, 149-158.
